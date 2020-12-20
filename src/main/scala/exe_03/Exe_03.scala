@@ -11,6 +11,7 @@ object Exe_03 {
     val data_path = "src/main/scala/exe_03/data.txt"
     val right = 3
     val down = 1
+    val all_moves = List((1,1), (3,1), (5,1), (7,1), (1,2))
 
     def load_data(path: String): (Vector[String], Int, Int) = {
       val data = Source.fromFile(path).getLines.toVector
@@ -23,7 +24,7 @@ object Exe_03 {
       ((right + current_col) % cols, if (down + current_row < rows) down + current_row else -1)
     }
 
-    def count_trees_on_path(data: Vector[String], rows: Int, cols: Int, right: Int, down: Int): Int = {
+    def count_trees_on_path(data: Vector[String], rows: Int, cols: Int)(right: Int, down: Int): Int = {
 
       def loop(current_row: Int, current_col: Int, current_count: Int): Int = {
         val (new_col, new_row) = move(right, down, current_row, current_col, rows, cols)
@@ -39,9 +40,15 @@ object Exe_03 {
     }
 
     val (test_data, test_rows, test_cols) = load_data(test_data_path)
-    assert(count_trees_on_path(test_data, test_rows, test_cols, right, down) == 7)
+    assert(count_trees_on_path(test_data, test_rows, test_cols)(right, down) == 7)
 
     val (data, rows, cols) = load_data(data_path)
-    println(count_trees_on_path(data, rows, cols, right, down))
+    println(count_trees_on_path(data, rows, cols)(right, down)) // 234
+    assert(count_trees_on_path(data, rows, cols)(right, down) == 234)
+
+    val test_part_2 = (all_moves map {x => count_trees_on_path(test_data, test_rows, test_cols)(x._1, x._2)}).product
+    assert(test_part_2 == 336)
+
+    println((all_moves map {x => count_trees_on_path(data, rows, cols)(x._1, x._2).toLong}).product)
   }
 }
