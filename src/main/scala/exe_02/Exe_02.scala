@@ -2,8 +2,6 @@ package exe_02
 
 import scala.io.Source
 
-// TODO check other scala solution for exe1 and 2
-
 object Exe_02 {
   def main(args: Array[String]): Unit = {
 
@@ -52,20 +50,31 @@ object Exe_02 {
       loop(min.toInt, max.toInt, target_char(0), password.toList, password_length)
     }
 
-    def get_correct_pw_count(data: List[String]): Int = {
+    def get_correct_pw_count(data: List[String], check_password: ((String, String, String, String)) => Boolean): Int = {
       data map parse_string map check_password count { x => x }
     }
 
-    def test_all(test_data: List[String], correct_pws: List[Boolean], correct_count: Int): Unit = {
+    def test_all(test_data: List[String], correct_pws: List[Boolean], check_password: ((String, String, String, String)) => Boolean): Unit = {
+      val correct_count = correct_pws count {x => x}
       val checked_data = test_data map parse_string map check_password
+      val count = get_correct_pw_count(test_data, check_password)
       assert(checked_data == correct_pws, checked_data)
-      assert(get_correct_pw_count(test_data) == correct_count, get_correct_pw_count(test_data))
+      assert(count == correct_count, count)
     }
 
-    test_all(test_data_1, List(true, false, true), 2)
-    test_all(test_data_2, List(true, false, true, false, true), 3)
+    test_all(test_data_1, List(true, false, true), check_password)
+    test_all(test_data_2, List(true, false, true, false, true), check_password)
 
-    println(get_correct_pw_count(data))
+    println(get_correct_pw_count(data, check_password))  // 560
 
+    def check_password_new(input_tuple: (String, String, String, String)): Boolean = {
+      val (fst, sec, target_char, password) = input_tuple
+      val fst_char = password(fst.toInt -1)
+      val sec_char = password(sec.toInt -1)
+      ((fst_char == target_char(0)) || (sec_char == target_char(0))) && (fst_char != sec_char)
+    }
+
+    test_all(test_data_1 , List(true, false, false), check_password_new)
+    println(get_correct_pw_count(data, check_password_new))  // 303
   }
 }
