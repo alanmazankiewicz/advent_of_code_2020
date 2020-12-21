@@ -2,7 +2,6 @@ package exe_03
 
 import scala.io.Source
 
-// TODO check other scala solution for exe1 and 2
 
 object Exe_03 {
   def main(args: Array[String]): Unit = {
@@ -40,15 +39,17 @@ object Exe_03 {
     }
 
     val (test_data, test_rows, test_cols) = load_data(test_data_path)
-    assert(count_trees_on_path(test_data, test_rows, test_cols)(right, down) == 7)
+    val test_count_trees: (Int, Int) => Int = count_trees_on_path(test_data, test_rows, test_cols)
+    assert(test_count_trees(right, down) == 7)
 
     val (data, rows, cols) = load_data(data_path)
-    println(count_trees_on_path(data, rows, cols)(right, down)) // 234
-    assert(count_trees_on_path(data, rows, cols)(right, down) == 234)
+    val apply_count_trees: (Int, Int) => Int = count_trees_on_path(data, rows, cols)
+    println(apply_count_trees(right, down)) // 234
+    assert(apply_count_trees(right, down) == 234)
 
-    val test_part_2 = (all_moves map {x => count_trees_on_path(test_data, test_rows, test_cols)(x._1, x._2)}).product
+    val test_part_2 = (all_moves map {x => test_count_trees(x._1, x._2)}).product
     assert(test_part_2 == 336)
 
-    println((all_moves map {x => count_trees_on_path(data, rows, cols)(x._1, x._2).toLong}).product)
+    println((all_moves map {x => apply_count_trees(x._1, x._2).toLong}).product)
   }
 }
