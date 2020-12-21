@@ -1,7 +1,6 @@
 package exe_04
 
 import scala.io.Source
-import scala.util.matching.Regex
 
 // TODO check other scala solution for exe1 and 2 and 3
 
@@ -9,7 +8,7 @@ import scala.util.matching.Regex
 object Exe_04 {
   def main(args: Array[String]): Unit = {
 
-    val test_data_path = "src/main/scala/exe_04/test_data.txt"
+    val test_data_path = "src/main/scala/exe_04/test_data_2.txt"
     val data_path = "src/main/scala/exe_04/data.txt"
 
     val full_test_data = Source.fromFile(test_data_path).getLines.toList
@@ -20,14 +19,19 @@ object Exe_04 {
     val byr_pattern = "^([1][9][2-9][0-9]|[2][0][0][0-2])$"
     val iyr_pattern = "^([2][0][1][0-9]|2020)$"
     val eyr_pattern = "^([2][0][2][0-9]|2030)$"
-    val hgt_pattern = "(^([1][5-8][0-9]|[1][9][0-3]) cm$)|(^([6][0-9]|[7][0-6]|59) in$)"
+    val hgt_pattern = "(^([1][5-8][0-9]|[1][9][0-3])cm$)|(^([6][0-9]|[7][0-6]|59)in$)"
     val hcl_pattern = "^#[a-f,0-9]{6}$"
+    val ecl_pattern = "^(amb|blu|brn|gry|grn|hzl|oth)$"
+    val pid_pattern = "^[0-9]{9}$"
+    val cid_pattern = ".*"
 
-
+    val pattern_map = Map(("byr", byr_pattern), ("iyr", iyr_pattern), ("eyr", eyr_pattern),
+      ("hgt", hgt_pattern), ("hcl", hcl_pattern), ("ecl", ecl_pattern), ("pid", pid_pattern),
+      ("cid", cid_pattern))
 
     def parse_line(line: String): Map[String, String] = {
       val splitted = line.split(" ")
-      (splitted map { x => x.split(":")} map (arr => arr(0) -> arr(1))).toMap
+      (splitted map { x => x.split(":") } map (arr => arr(0) -> arr(1))).toMap
     }
 
     def parse_passport(passports: List[String]): (Map[String, String], List[String]) = {
@@ -54,20 +58,42 @@ object Exe_04 {
       loop(passports, Nil)
     }
 
-    def validate_all_passports(required_fields: Set[String], parsed_passports: List[Map[String, String]]): List[Boolean] = {
+    def validate_all_passport_keys(required_fields: Set[String], parsed_passports: List[Map[String, String]]): List[Boolean] = {
       parsed_passports map { x => (x.keySet + "cid") == required_fields }
     }
 
-    val test_result_pt_1 = validate_all_passports(required_fields, parse_all_passports(full_test_data)) count { x => x }
-    assert(test_result_pt_1 == 2)
+    def filter_valid_passports(parsed_passports: List[Map[String, String]], valid_keys: List[Boolean]): List[Map[String, String]] = {
+      (parsed_passports zip valid_keys) filter { x => x._2 } map { x => x._1 }
+    }
 
-    val result_pt_1 = validate_all_passports(required_fields, parse_all_passports(full_data)) count { x => x }
-    println(result_pt_1)
+    def validate_valid_passport_fields(validation_map: Map[String, String], valid_passports: List[Map[String, String]]): List[Boolean] = {
 
+      def check_passport(passport: Map[String, String]): Boolean = {
+        (passport map { case (key, value) => value.matches(validation_map(key)) }) forall {x => x}
+      }
 
+      valid_passports map check_passport
+    }
 
-    println("69 in".matches(hgt_pattern))
+    val parsed_test_passports = parse_all_passports(full_test_data)
+    val valid_test_pass_keys = validate_all_passport_keys(required_fields, parsed_test_passports)
+    val valid_test_passports = validate_valid_passport_fields(pattern_map, filter_valid_passports(parsed_test_passports, valid_test_pass_keys))
+
+    val test_result_keys =  valid_test_pass_keys count { x => x }
+    val test_result_key_fields = valid_test_passports count { x => x }
+    println(test_result_keys)
+    println(test_result_key_fields)
     println("")
+
+    val parsed_passports = parse_all_passports(full_data)
+    val valid_pass_keys = validate_all_passport_keys(required_fields, parsed_passports)
+    val valid_passports = validate_valid_passport_fields(pattern_map, filter_valid_passports(parsed_passports, valid_pass_keys))
+
+    val result_pt_1 =  valid_pass_keys count { x => x }
+    val result_pt_2 = valid_passports count { x => x }
+    println(result_pt_1)
+    println(result_pt_2)
+
 
     // End
   }
