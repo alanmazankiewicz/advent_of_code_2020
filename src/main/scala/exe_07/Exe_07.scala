@@ -65,7 +65,7 @@ object Exe_07 {
 
     def get_down_stream_bag_counts(bag_color: String, rules: Map[String, List[String]]): Int = {
 
-      def loop(bag_color: String, current_count: Int, catch_map: Map[String, Int]): Int = {
+      def loop(bag_color: String, current_count: Int, catch_map: Map[String, Int]): (Int, Map[String, Int]) = {
 
         def catch_helper(accumulator: (Int, Map[String, Int]), count_bag_color: String): (Int, Map[String, Int]) = {
           val (current_total_count, catch_map) = accumulator
@@ -76,20 +76,20 @@ object Exe_07 {
           check_catch match {
             case Some(new_count) => (current_total_count + new_count * bag_count, catch_map)
             case None => {
-              val new_count = loop(bag_color, 1, catch_map)  // TODO: return catch map
-              val new_map = catch_map + (bag_color -> new_count)
+              val (new_count, looped_catch_map) = loop(bag_color, 1, catch_map)
+              val new_map = looped_catch_map + (bag_color -> new_count)
               (current_total_count + bag_count * new_count, new_map)
             }
           }
         }
-        if (bag_color == "ootherbags.") 0
+        if (bag_color == "ootherbags.") (0, catch_map)
         else {
           val downstream_bags: List[String] = rules(bag_color)
-          downstream_bags.foldLeft((current_count, catch_map))(catch_helper)._1
+          downstream_bags.foldLeft((current_count, catch_map))(catch_helper)
         }
       }
 
-      loop(bag_color, 0, Map())
+      loop(bag_color, 0, Map())._1
     }
 
 
@@ -103,11 +103,16 @@ object Exe_07 {
     // Part 2
 
     val target_to_source_parse: List[String] => Map[String, List[String]] = parse_rules(parse_line(from_target_to_source, get_source_bags(true)))
-    val test_2 = target_to_source_parse(full_test_data)
-    val test_result = get_down_stream_bag_counts("shinygold", test_2)
-    println(test_result)
 
-    println("JSJS")
+    val test_2 = target_to_source_parse(full_test_data)
+    val test_2_result = get_down_stream_bag_counts("shinygold", test_2)
+    println(test_2_result)
+
+    val parsed_data = target_to_source_parse(full_data)
+    val result_2 = get_down_stream_bag_counts("shinygold", parsed_data)
+    println(result_2)
+
+
     // End
   }
 }
