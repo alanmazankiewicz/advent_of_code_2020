@@ -2,9 +2,6 @@ package exe_05
 
 import scala.io.Source
 
-// TODO check other scala solution for exe1 and 2 and 3, 4
-
-
 object Exe_05 {
   def main(args: Array[String]): Unit = {
 

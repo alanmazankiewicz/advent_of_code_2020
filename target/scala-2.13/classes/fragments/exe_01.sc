@@ -4,11 +4,6 @@ val test_lst = (1 to 10000000).toList
 val test_set = test_lst.toSet
 val result = test_set.contains(2)
 
-
-// TODO: load values from file
-// TODO: google aufgabe
-
-
 def time[R](block: => R): R = {
   val t0 = System.nanoTime
   val result = block    // call-by-name
@@ -55,7 +50,7 @@ val result = time {
 
 // Should be less efficient
 // 3.
-def get_summing_pair_map_find(target_value: Int, values: List[Int]): Int = { // TODO efficiency?
+def get_summing_pair_map_find(target_value: Int, values: List[Int]): Int = {
   val value_set = values.toSet
   val result = values map {x => (x, target_value - x)} find {x => value_set contains x._2}
   val (x,y) = result.get
