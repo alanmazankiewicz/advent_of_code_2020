@@ -1,7 +1,6 @@
 package exe_14
 
 import scala.io.Source
-import scala.collection.immutable.BitSet
 
 object Exe_14 {
 
