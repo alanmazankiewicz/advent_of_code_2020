@@ -8,6 +8,6 @@ is divided into 2 subproblems. The second subproblem becomes available when you 
 Unfortunetly, I started working on AoC 2020 when it was already going on :(
 
 ## Repository Structure 
-[Here](advent_of_code_2020/src/main/scala/) you can find the relevent source code. For each day / problem there is one directory containing the code, 
+[Here](https://github.com/alanmazankiewicz/advent_of_code_2020/tree/master/src/main/scala) you can find the relevent source code. For each day / problem there is one directory containing the code, 
 test input and final input for the problem. Usually, the code for both subproblems is kept in one file. For some problems it was faster and easier to seperate 
 both subproblems though. 
