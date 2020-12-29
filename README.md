@@ -1,4 +1,4 @@
-# advent_of_code_2020
+# Advent of Code 2020
 My Scala Solution to [Advent of Code 2020](https://adventofcode.com). <br>
 <br>
 The challenge is about solving algorithmic problems for a given input and submitting the solution as fast as possible. 
