@@ -1,6 +1,7 @@
 package exe_16
 
 import scala.io.Source
+import scala.collection.mutable
 
 object Exe_16 {
 
@@ -41,25 +42,45 @@ object Exe_16 {
       tmp map { y => (y._1, (y._2 map { x => x.split("-") } flatMap { x => x(0).toInt to x(1).toInt }).toSet) }
     }
 
-    def find_fields(valid_tickets: List[List[Int]], field_map: List[(String, Set[Int])]): List[String] = {
+    def find_fields(valid_tickets: List[List[Int]], field_map: List[(String, Set[Int])]): List[Set[String]] = {
       val fields = valid_tickets.transpose
 
-      def helper(res: Option[(String, Set[Int])]): String = {
-        res match {
-          case Some(x) => x._1
-        }
+      fields map { (fld => field_map filter { mp => fld forall { x => mp._2.contains(x) } } map { x => x._1}) } map { x => x.toSet }
+    }
+
+    def filter_result(potential_fields: List[Set[String]]): List[String] = {
+      val mut_fields = (potential_fields map { x => x.to(mutable.Set) }).to(Array)
+      val result_map: mutable.HashMap[String, Int] = mutable.HashMap()
+      var run = true
+      var i = 0
+
+      def kill(target: String): Unit = {
+        mut_fields map { set => if (set.contains(target)) set -= target  }
       }
 
-      fields map { fld => field_map find { mp => fld forall { x => mp._2.contains(x) } } } map helper
+      while (run) {
+        run = false
+        val current_set = mut_fields(i)
+
+        if(current_set.size == 1) {
+          result_map.addOne(current_set.head -> i)
+          kill(current_set.head)
+          run = true
+        }
+        i = (i + 1) % mut_fields.length
+      }
+      List("jas")
     }
 
 
     def run_v2(fields: Vector[String], nearby_tickets: Vector[String]): List[String] = {
       val valid_tickets = filter_invalids(parse_fields(fields), parse_nearby_tickets(nearby_tickets))
-      find_fields(valid_tickets, parse_fields_v2(fields))
+      val potential_fields = find_fields(valid_tickets, parse_fields_v2(fields))
+      val test = filter_result(potential_fields)
+      List("as")
     }
 
-    val test = run_v2(test_fields, test_nearby_tickets)
+    val test = run_v2(fields, nearby_tickets)
 
     println("s")
 
