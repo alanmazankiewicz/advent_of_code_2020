@@ -12,7 +12,6 @@ object Exe_18 {
     val data = Source.fromFile(data_path).getLines.toVector
 
 
-    // test
     // END
   }
 }
