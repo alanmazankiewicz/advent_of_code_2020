@@ -52,21 +52,21 @@ object Exe_18 {
       reduce("0", "+", parsed)
     }
 
-    def evaluate_expression_pt2(expression: String): String = {
+    def evaluate_expression_pt2(expression: String): Long = {
       val parsed = parse_expression(expression).toList
 
-      def helper(ele: String): String = {
+      def helper(ele: String): Long = {
         if (ele.length > 1) evaluate_expression_pt2(ele)
-        else ele
+        else ele.toLong
       }
 
-      def reduce_sum(value: String, operation: String, parsed: List[String], multiplications: Vector[String]): Vector[String] = {
+      def reduce_sum(value: Long, operation: String, parsed: List[String], multiplications: Vector[Long]): Vector[Long] = {
        val (new_multi, new_value) =  if (operation == "*") {
          val n_value = helper(parsed.head)
          (multiplications :+ n_value, n_value)
         }
         else {
-         val n_value = (value.toLong + helper(parsed.head).toLong).toString
+         val n_value = value + helper(parsed.head)
          (multiplications.dropRight(1) :+ n_value, n_value)
         }
 
@@ -78,7 +78,7 @@ object Exe_18 {
           reduce_sum(new_value, next_operation, rest.tail, new_multi)
         }
       }
-      (reduce_sum("0", "+", parsed, Vector()) map { x => x.toLong}).product.toString
+      reduce_sum(0L, "+", parsed, Vector()).product
     }
 
 
