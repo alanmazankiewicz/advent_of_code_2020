@@ -30,33 +30,11 @@ object Exe_18 {
       loop(expression.toList, Vector(), new StringBuilder(), 0)
     }
 
-    def parse_expression_pt2(expression: String): Vector[String] = {
-      val parsed = parse_expression(expression)
-      if(parsed.length == 3) parsed
-      else {
-        val add_idxes = (parsed.zipWithIndex filter { x => x._1 == "+" } map { x => x._2 }).toList
-
-        def add_parent(add_idxes: List[Int], parsed: Vector[String]): Vector[String] = {
-          if (add_idxes == Nil) parsed
-          else {
-            val (lower, upper) = (add_idxes.head -1, add_idxes.head +1)
-            val lower_parsed = '(' +: parsed(lower)
-            val upper_parsed = parsed(upper) :+ ')'
-            val new_parsed = parsed.updated(lower, lower_parsed).updated(upper, upper_parsed)
-            add_parent(add_idxes.tail, new_parsed)
-          }
-        }
-
-        val new_raw = add_parent(add_idxes, parsed).mkString
-        parse_expression(new_raw)
-      }
-    }
-
-    def evaluate_expression(parse_expression_meta: String => Vector[String])(expression: String): String = {
-      val parsed = parse_expression_meta(expression).toList
+    def evaluate_expression(expression: String): String = {
+      val parsed = parse_expression(expression).toList
 
       def helper(ele: String): String = {
-        if (ele.length > 1) evaluate_expression(parse_expression_meta)(ele)
+        if (ele.length > 1) evaluate_expression(ele)
         else ele
       }
 
@@ -74,13 +52,11 @@ object Exe_18 {
       reduce("0", "+", parsed)
     }
 
-    def run(data: Vector[String], parse_expression_meta: String => Vector[String]): Long = {
-      val curried_eva_express: String => String = evaluate_expression(parse_expression_meta)
-      (data map curried_eva_express map { x => x.toLong }).sum
+    def run(data: Vector[String]): Long = {
+      (data map evaluate_expression map { x => x.toLong }).sum
     }
 
-    //println(run(data, parse_expression))
-    println(evaluate_expression(parse_expression_pt2)("1 + (2 * 3) + (4 * (5 + 6))"))
+    println(run(data))
     // println(run(data, parse_expression_pt2))
     // END
   }
