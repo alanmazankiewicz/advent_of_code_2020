@@ -2,7 +2,7 @@ package exe_19
 
 import scala.io.Source
 
-object Exe_19 {
+object Exe_19_2 {
 
   def main(args: Array[String]): Unit = {
 
@@ -30,7 +30,9 @@ object Exe_19 {
       data.foldLeft(empty_set)({ (set, x) => set + x })
     }
 
-    def count_valid_rules(rules_map: Map[String, List[List[String]]], data: Set[String]): Int = {
+    def count_valid_rules(rules_map: Map[String, List[List[String]]], data: Set[String], limit_inifinity: Int): Int = {
+
+      var limit = limit_inifinity
 
       def combine_lists(fst: List[String], sec: List[String]): List[String] = {
         for {
