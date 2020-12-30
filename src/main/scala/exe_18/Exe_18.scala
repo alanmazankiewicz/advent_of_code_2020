@@ -30,17 +30,17 @@ object Exe_18 {
       loop(expression.toList, Vector(), new StringBuilder(), 0)
     }
 
-    def evaluate_expression(expression: String): String = {
+    def evaluate_expression(expression: String): Long = {
       val parsed = parse_expression(expression).toList
 
-      def helper(ele: String): String = {
+      def helper(ele: String): Long = {
         if (ele.length > 1) evaluate_expression(ele)
-        else ele
+        else ele.toLong
       }
 
-      def reduce(value: String, operation: String, parsed: List[String]): String = {
-        val op_func = if (operation == "+") { (x:String ,y:String) => x.toLong + y.toLong} else { (x:String ,y:String) => x.toLong * y.toLong}
-        val evaluated = op_func(value, helper(parsed.head)).toString
+      def reduce(value: Long, operation: String, parsed: List[String]): Long = {
+        val op_func = { (x:Long, y:Long) => if (operation == "+") x + y else x * y}
+        val evaluated = op_func(value, helper(parsed.head))
         if (parsed.tail == Nil) evaluated
         else
           {
@@ -49,7 +49,7 @@ object Exe_18 {
             reduce(evaluated, next_operation, rest.tail)
           }
       }
-      reduce("0", "+", parsed)
+      reduce(0L, "+", parsed)
     }
 
     def evaluate_expression_pt2(expression: String): Long = {
@@ -82,13 +82,14 @@ object Exe_18 {
     }
 
 
-    def run(data: Vector[String]): Long = {
-      (data map evaluate_expression map { x => x.toLong }).sum
+    def run(data: Vector[String], evaluate_expression: String => Long): Long = {
+      (data map evaluate_expression).sum
     }
 
-    // println(run(data))
-    println(evaluate_expression_pt2("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"))
-    // println(run(data, parse_expression_pt2))
+    println(run(data, evaluate_expression))
+    println(run(data, evaluate_expression_pt2))
+
+
     // END
   }
 }
