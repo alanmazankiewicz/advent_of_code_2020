@@ -63,7 +63,7 @@ object Exe_18 {
       def reduce_sum(value: String, operation: String, parsed: List[String], multiplications: Vector[String]): Vector[String] = {
        val (new_multi, new_value) =  if (operation == "*") {
          val n_value = helper(parsed.head)
-         (multiplications :+ operation :+ n_value, n_value)
+         (multiplications :+ n_value, n_value)
         }
         else {
          val n_value = (value.toLong + helper(parsed.head).toLong).toString
@@ -78,7 +78,7 @@ object Exe_18 {
           reduce_sum(new_value, next_operation, rest.tail, new_multi)
         }
       }
-      ((reduce_sum("0", "+", parsed, Vector()) filter {x => x != "*"} map { x => x.toLong}).product).toString // keeping * is unnessesary
+      (reduce_sum("0", "+", parsed, Vector()) map { x => x.toLong}).product.toString
     }
 
 
