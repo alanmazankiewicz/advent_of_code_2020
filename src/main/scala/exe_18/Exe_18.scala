@@ -52,11 +52,42 @@ object Exe_18 {
       reduce("0", "+", parsed)
     }
 
+    def evaluate_expression_pt2(expression: String): String = {
+      val parsed = parse_expression(expression).toList
+
+      def helper(ele: String): String = {
+        if (ele.length > 1) evaluate_expression_pt2(ele)
+        else ele
+      }
+
+      def reduce_sum(value: String, operation: String, parsed: List[String], multiplications: Vector[String]): Vector[String] = {
+       val (new_multi, new_value) =  if (operation == "*") {
+         val n_value = helper(parsed.head)
+         (multiplications :+ operation :+ n_value, n_value)
+        }
+        else {
+         val n_value = (value.toLong + helper(parsed.head).toLong).toString
+         (multiplications.dropRight(1) :+ n_value, n_value)
+        }
+
+        if (parsed.tail == Nil) new_multi
+        else
+        {
+          val rest = parsed.tail
+          val next_operation = rest.head
+          reduce_sum(new_value, next_operation, rest.tail, new_multi)
+        }
+      }
+      ((reduce_sum("0", "+", parsed, Vector()) filter {x => x != "*"} map { x => x.toLong}).product).toString // keeping * is unnessesary
+    }
+
+
     def run(data: Vector[String]): Long = {
       (data map evaluate_expression map { x => x.toLong }).sum
     }
 
-    println(run(data))
+    // println(run(data))
+    println(evaluate_expression_pt2("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"))
     // println(run(data, parse_expression_pt2))
     // END
   }
