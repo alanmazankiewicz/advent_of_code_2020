@@ -5,7 +5,7 @@ The challenge is about solving algorithmic problems for a given input and submit
 Although I took care of good coding practice and efficiency keep in mind that the primary goal is to develope any workable solution as fast as possible.
 Each day for 25 days a new problem gets unlocked. Each problem
 is divided into 2 subproblems. The second subproblem becomes available when you submit your solution to the first subproblem. 
-Unfortunetly, I started working on AoC 2020 when it was already going on :(
+Unfortunetly, I started working on AoC 2020 when it already started :(
 
 ## Repository Structure 
 [Here](https://github.com/alanmazankiewicz/advent_of_code_2020/tree/master/src/main/scala) you can find the relevent source code. For each day / problem there is one directory containing the code, 
