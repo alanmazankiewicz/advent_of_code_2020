@@ -1,67 +1,106 @@
+def parse(raw):
+    return {i: r.replace('"', '') for i,r in [l.split(': ') for l in raw.splitlines()]}
+
+rules_raw, data_raw = open('input.txt').read().split('\n\n')
+rules = parse(rules_raw)
+
 import re
+import ring
+re_num = re.compile('\d+')
 
 
-def fill_rule(rules, rule_num):
-    rule = rules[rule_num]
-    if re.search("[a-z]", rule):
-        return rule
-    for sub_rule in rule.split(" | "):
-        for num in sub_rule.split():
-            inner_rule = fill_rule(rules, int(num))
-            if "|" in inner_rule:
-                inner_rule = f"({inner_rule})"
-            rule = rule.replace(num, inner_rule, 1)
-    rule = rule.replace(" ", "")
-    rules[rule_num] = rule
-    return rule
+def expand(r: str):
+    #print('new call', r)
+    pos_dash = r.find('|')
+    contains_num = re_num.findall(r)
+
+    if pos_dash > 0:
+        return expand(r[:pos_dash]).union(expand(r[pos_dash+1:]))
+
+    if re_num.fullmatch(r.strip()):
+        return expand(rules[contains_num[0]])
+
+    if not contains_num and pos_dash < 0:
+        return set([r.replace(' ', '')])
+
+    res = set()
+    for m in re_num.finditer(r):
+        #print(m)
+        to_add = set(r[:m.span()[0]] + poss + r[m.span()[1]:] for poss in expand(m.group()))
+        #print('to_add', to_add)
+        expanded =  [expand(e.strip()) for e in to_add]
+        res = res.union(*expanded)
+    #print("res", res)
+
+    return res
+
+#print(expand('"a" "b"'))
+all_rules = expand('0')
+
+sum(1 for m in data_raw.splitlines() if m in all_rules)
+
+len(data_raw.splitlines())
 
 
-def is_following_rule(message, rule):
-    return bool(re.match(f"^({rule})$", message))
+expand.cache_clear()
+all_rules = expand('0')
+four2 = expand('42')
+three1 = expand('31')
+
+len(three1)
+
+already_good = sum(1 for m in data_raw.splitlines() if m in all_rules)
+to_check = [m for m in data_raw.splitlines() if m not in all_rules]
+print(len(to_check), already_good)
 
 
-with open("tmp_test_data.txt", "r") as file:
-    sections_raw = file.read().split("\n\n")
-    rules_raw = sections_raw[0].replace("\"", "").split("\n")
-    messages = sections_raw[1].split("\n")
 
-rules = {}
-for rule_raw in rules_raw:
-    components = rule_raw.split(": ")
-    num = int(components[0])
-    rule = components[1]
-    rules[num] = rule
 
-# Part 1
-filled_rules = rules.copy()
-rule_num = 0
-fill_rule(filled_rules, rule_num)
-num_valid = 0
-for message in messages:
-    if is_following_rule(message, filled_rules[rule_num]):
-        num_valid += 1
-print("Part 1:", num_valid)
+def get_31s(d):
+    #print('call', d)
+    p = set(d[len(c):] for c in three1 if d.startswith(c))
+    if len(p) == 0:
+        return set([d])
+    for a in p:
+        return set('31 ' + b for b in get_31s(a))
+get_31s.cache_clear()
 
-# Part 2
-# Used a few hints for this one but didn't use any specific solution.
-# I realised that the pattern would be 42+ followed by 42{n}31{n}
-# but I wasn't sure how to accomplish the same number of 31s and 32s
-# in the second half.
-rule_42 = filled_rules[42]
-rule_31 = filled_rules[31]
 
-pattern = (
-    f"^({rule_42})+"
-    "("
-    f"({rule_42}){{1}}({rule_31}){{1}}|"
-    f"({rule_42}){{2}}({rule_31}){{2}}|"
-    f"({rule_42}){{3}}({rule_31}){{3}}|"
-    f"({rule_42}){{4}}({rule_31}){{4}}"
-    ")$"
-)
+def is_valid(d: str):
+    d = d.strip()
+    s = set(d.split(' '))
+    if not s in [set(['31', '42']), set(['42'])]:
+        return False
+    if not d.startswith('42'):
+        return False
+    if d.count('42 31') != 1:
+        return False
+    if d.count('31 42') > 0:
+        return False
+    if d.count('31') >= d.count('42'):
+        return False
+    #print(d)
+    return True
 
-num_valid = 0
-for msg in messages:
-    if re.match(pattern, msg):
-        num_valid += 1
-print("Part 2:", num_valid)
+
+possibles = []
+for c in to_check:
+    res = set()
+    for cand in get_42s(c):
+        spl = cand.strip().split(' ')
+        for replaced in get_31s(spl[-1]):
+            res.add(" ".join(spl[:-1] + [replaced.strip()]))
+        #res.update()
+
+    possibles.append(res)
+
+res = 0
+for i,el in enumerate(possibles):
+    #print(el)
+    if any(map(is_valid, el)):
+        # print(el, to_check[i])
+        res += 1
+
+print(res + already_good)
+
+

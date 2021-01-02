@@ -1,6 +1,7 @@
 package exe_19
 
 import scala.io.Source
+import scala.collection.mutable
 
 object Exe_19_2 {
 
@@ -30,34 +31,63 @@ object Exe_19_2 {
       data.foldLeft(empty_set)({ (set, x) => set + x })
     }
 
-    def count_valid_rules(rules_map: Map[String, List[List[String]]], data: Set[String]): Int = {
+    def count_valid_rules(rules_map: Map[String, List[List[String]]], data: Set[String]): (Int, Int) = {
 
-      def combine_rule(fst: String, sec: String): String = { // TODO stringbuffer and foldLeft, catch
-        fst + sec
+      def get_regexes(from: Int): (String, Map[String, String]) = {
+
+        val catch_mem: mutable.Map[String, String] = mutable.Map()
+
+        def combine_rule(builder: StringBuilder, str: String): StringBuilder = {
+          builder ++= str
+        }
+
+        def combine_rules(fst: String, sec: String): String = {
+          "(" + fst + "|" + sec + ")"
+        }
+
+        def process_element(ele: String): String = {
+          if (ele == "a" || ele == "b") ele
+          else {
+            catch_mem.get(ele) match {
+              case Some(substring) => substring
+              case None => {
+                val processed = process_rules(rules_map(ele))
+                catch_mem += (ele -> processed)
+                processed
+              }
+            }
+          }
+        }
+
+        def process_rule(rule: List[String]): String = {
+          (rule map process_element).foldLeft(new StringBuilder)(combine_rule).mkString
+        }
+
+        def process_rules(rules: List[List[String]]): String = {
+          rules map process_rule reduce combine_rules // only works if there is max one "|" per rule
+        }
+
+        ("^" + process_rules(rules_map(from.toString)) + "$", catch_mem.toMap)
       }
 
-      def combine_rules(fst: String, sec: String): String = {
-        "(" + fst + "|" + sec + ")"
+      val (main_regex, regex_map) = get_regexes(0)
+
+      val snd_regex: String = {
+
+        val four = regex_map("42")
+        val three = regex_map("31")
+
+        def combine_rules(buffer: StringBuilder, str: String): StringBuilder = {
+          buffer ++= str
+          buffer ++= "|"
+        }
+
+        val body = (1 to 10) map { x => s"($four){$x}($three){$x}" } reduce { (x,y) => x + "|" + y }
+
+        s"^($four)+(" + body + ")$"
       }
 
-      def process_element(ele: String): String = {
-        if (ele == "a" || ele == "b") ele
-        else process_rules(rules_map(ele))
-      }
-
-      def process_rule(rule: List[String]): String = {
-        rule map process_element reduce combine_rule
-      }
-
-      def process_rules(rules: List[List[String]]): String = {
-        rules map process_rule reduce combine_rules
-      }
-
-      def get_regex(from: Int): String = "^" + process_rules(rules_map(from.toString)) + "$"
-
-      val main_regex = get_regex(0)
-
-      data count {x => x.matches(main_regex)}
+      (data count { x => x.matches(main_regex) }, data count { x => x.matches(snd_regex) })
     }
 
     println(count_valid_rules(parse_all_rules(rules), parse_data(data)))
