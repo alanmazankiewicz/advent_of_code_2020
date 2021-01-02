@@ -72,7 +72,8 @@ object Exe_20 {
 
     def find_orient_neigtbour(tiles: List[Tile])(tile: Tile): List[Tile] = {
 
-      // it is absolultey clear that if two edges match these tiles definetly match! An edge cannot match more than one other match irrespective of orientation!!!
+      // it is absolultey clear that if two edge pattern match irrespective of orientation these tiles definetly match!
+      // An edge cannot match more than one other match irrespective of orientation!!!
       def get_any_edge(cur_tile_edge: String): List[Tile] = {
         tiles filter { x => (x.lower == cur_tile_edge || x.upper == cur_tile_edge || x.left == cur_tile_edge || x.right == cur_tile_edge ||
           x.lower.reverse == cur_tile_edge || x.upper.reverse == cur_tile_edge || x.left.reverse == cur_tile_edge || x.right.reverse == cur_tile_edge) &&
@@ -80,8 +81,7 @@ object Exe_20 {
       }
 
       val res = tile.get_edges() flatMap get_any_edge
-      if(res.length > 0) tile :: res
-      else find_orient_neigtbour(tiles)(tile.rotate())
+      tile :: res
     }
 
     def find_corners(tiles: List[Tile]): List[Long] = {
@@ -91,6 +91,8 @@ object Exe_20 {
     val parsed_data = parse(data)
     val result_1 = find_corners(parsed_data).product
     println(result_1)
+
+    val test = find_orient_neigtbour(parsed_data)(parsed_data(1))
 
 
 
