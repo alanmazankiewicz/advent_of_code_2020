@@ -6,7 +6,7 @@ object Exe_20 {
 
   def main(args: Array[String]): Unit = {
 
-    val path = "src/main/scala/exe_20/data.txt"
+    val path = "src/main/scala/exe_20/test_data.txt"
     val data = Source.fromFile(path).getLines.mkString
 
     class Tile(val id: Long, val upper: String, val right: String, val lower: String, val left: String) { // could be parsed to booleans for size optimization
@@ -26,8 +26,12 @@ object Exe_20 {
         new Tile(this.id, new_upper, new_right, new_lower, new_left)
       }
 
-      def get_edges(): List[String] = {
+      val get_edges: List[String] = {
         List(this.upper, this.right, this.lower, this.left)
+      }
+
+      val edge_map: Map[String, String] = {
+        (List("upper", "right", "lower", "left") zip this.get_edges).toMap
       }
     }
 
@@ -80,7 +84,7 @@ object Exe_20 {
           x.id != tile.id }
       }
 
-      val res = tile.get_edges() flatMap get_any_edge
+      val res = tile.get_edges flatMap get_any_edge
       tile :: res
     }
 
@@ -89,10 +93,36 @@ object Exe_20 {
     }
 
     val parsed_data = parse(data)
-    val result_1 = find_corners(parsed_data).product
-    println(result_1)
+//    val result_1 = find_corners(parsed_data).product
+//    println(result_1)
 
-    val test = find_orient_neigtbour(parsed_data)(parsed_data(1))
+    // part_2
+
+    val reveresed_direction = Map(
+      "upper" -> "lower", "lower" -> "upper", "left" -> "right", "right" -> "left"
+    )
+
+    def get_correct_orient_neightbour(neighbour_tiles: List[Tile]): (Long, List[(Tile, String, Int, Boolean)]) = {
+      val tile = neighbour_tiles.head
+
+      def match_tiles(main_tile_edge: String, other_tile: Tile, direction: String, rotations: Int): Option[(Tile, String, Int, Boolean)] = {
+        if (rotations == 4) None
+        else if (other_tile.edge_map(reveresed_direction(direction)) == main_tile_edge) Option((other_tile, direction, rotations, false))
+        else if (other_tile.flip().edge_map(reveresed_direction(direction)) == main_tile_edge) Option((other_tile.flip(), direction, rotations, true))
+        else match_tiles(main_tile_edge, other_tile.rotate(), direction, rotations + 1)
+      }
+
+      val good_neighboors = (for {  // TODO i aldready know the position relative to tile -> dont search for that
+        (direction, main_tile_edge) <- tile.edge_map
+        other_tile <- neighbour_tiles.tail
+        result <- match_tiles(main_tile_edge, other_tile, direction, 0)
+      } yield result).toList
+
+      (tile.id, good_neighboors)
+    }
+
+    val test = find_orient_neigtbour(parsed_data)(parsed_data(1).flip())
+    val test_2 = get_correct_orient_neightbour(test)
 
 
 
