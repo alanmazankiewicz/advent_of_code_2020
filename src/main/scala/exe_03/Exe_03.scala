@@ -7,7 +7,7 @@ object Exe_03 {
   def main(args: Array[String]): Unit = {
 
     val test_data_path = "src/main/scala/exe_03/test_data.txt"
-    val data_path = "src/main/scala/exe_03/data.txt"
+    val data_path = "src/main/scala/exe_03/test_data.txt"
     val right = 3
     val down = 1
     val all_moves = List((1,1), (3,1), (5,1), (7,1), (1,2))

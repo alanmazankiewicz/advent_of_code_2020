@@ -9,7 +9,7 @@ object Exe_06 {
     val test_data_path = "src/main/scala/exe_06/test_data.txt"
     val full_test_data = Source.fromFile(test_data_path).getLines.toList
 
-    val data_path = "src/main/scala/exe_06/data.txt"
+    val data_path = "src/main/scala/exe_06/test_data.txt"
     val full_data = Source.fromFile(data_path).getLines.toList
 
     def parse_form(line: String): Set[Char] = {

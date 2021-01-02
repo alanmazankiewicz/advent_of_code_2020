@@ -9,7 +9,7 @@ object exe_08 {
     val test_data_path = "src/main/scala/exe_08/test_data.txt"
     val test_data = Source.fromFile(test_data_path).getLines.toVector
 
-    val data_path = "src/main/scala/exe_08/data.txt"
+    val data_path = "src/main/scala/exe_08/test_data.txt"
     val data = Source.fromFile(data_path).getLines.toVector
 
     def parse_line(line: String): (String, Int) = {

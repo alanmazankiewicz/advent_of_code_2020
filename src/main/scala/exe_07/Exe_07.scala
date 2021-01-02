@@ -9,7 +9,7 @@ object Exe_07 {
     val test_data_path = "src/main/scala/exe_07/test_data.txt"
     val full_test_data = Source.fromFile(test_data_path).getLines.toList
 
-    val data_path = "src/main/scala/exe_07/data.txt"
+    val data_path = "src/main/scala/exe_07/test_data.txt"
     val full_data = Source.fromFile(data_path).getLines.toList
 
     def get_source_bags(with_val: Boolean)(splitted: Array[String], start_pos: Int, offset: Int): List[String] = {

@@ -9,7 +9,7 @@ object Exe_12_2 {
     val test_data_path = "src/main/scala/exe_12/test_data.txt"
     val test_data = Source.fromFile(test_data_path).getLines.toList
 
-    val data_path = "src/main/scala/exe_12/data.txt"
+    val data_path = "src/main/scala/exe_12/test_data.txt"
     val data = Source.fromFile(data_path).getLines.toList
 
     val compass = Map(

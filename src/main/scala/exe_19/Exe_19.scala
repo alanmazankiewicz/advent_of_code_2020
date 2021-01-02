@@ -8,7 +8,7 @@ object Exe_19 {
 
     val path = "src/main/scala/exe_19/"
     val rules = Source.fromFile(path + "rules.txt").getLines.toList
-    val data = Source.fromFile(path + "data.txt").getLines.toList
+    val data = Source.fromFile(path + "test_data.txt").getLines.toList
 
     def parse_rule(parsed_rules: Map[String, List[List[String]]], rule: String): Map[String, List[List[String]]] = {
       val splitted = rule.split(": ")

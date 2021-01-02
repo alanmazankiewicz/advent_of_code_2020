@@ -8,7 +8,7 @@ object Exe_11 {
     val test_data_path = "src/main/scala/exe_11/test_data.txt"
     val test_data = Source.fromFile(test_data_path).getLines.toVector
 
-    val data_path = "src/main/scala/exe_11/data.txt"
+    val data_path = "src/main/scala/exe_11/test_data.txt"
     val data = Source.fromFile(data_path).getLines.toVector
 
     def adjacent_idxes(row: Int, col: Int, conditions: (Int, Int) => Boolean): List[(Int, Int)] = {

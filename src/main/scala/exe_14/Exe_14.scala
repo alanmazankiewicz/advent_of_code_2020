@@ -9,7 +9,7 @@ object Exe_14 {
     val test_data_path = "src/main/scala/exe_14/test_data.txt"
     val test_data = Source.fromFile(test_data_path).getLines.toList
 
-    val data_path = "src/main/scala/exe_14/data.txt"
+    val data_path = "src/main/scala/exe_14/test_data.txt"
     val data = Source.fromFile(data_path).getLines.toList
 
     def parseLine(line: String): Either[(Long, Long), String] = {

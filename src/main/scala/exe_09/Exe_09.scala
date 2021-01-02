@@ -10,7 +10,7 @@ object Exe_09 {
     val test_data_path = "src/main/scala/exe_09/test_data.txt"
     val test_data = Source.fromFile(test_data_path).getLines.toVector map (_.toLong)
 
-    val data_path = "src/main/scala/exe_09/data.txt"
+    val data_path = "src/main/scala/exe_09/test_data.txt"
     val data = Source.fromFile(data_path).getLines.toVector map (_.toLong)
 
     def check_summing_pair(target_value: Long, value_set: Set[Long]): Boolean = {

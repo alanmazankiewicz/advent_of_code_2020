@@ -6,7 +6,7 @@ import scala.io.Source
 object Exe_01 {
   def main(args: Array[String]): Unit = {
 
-    val data_path = "src/main/scala/exe_01/data.txt"
+    val data_path = "src/main/scala/exe_01/test_data.txt"
     val raw_data = Source.fromFile(data_path).getLines.toList
     val data = raw_data.map(_.toInt)
     val test_data = (1 to 20).toList

@@ -5,7 +5,7 @@ import scala.io.Source
 object Exe_02 {
   def main(args: Array[String]): Unit = {
 
-    val data_path = "src/main/scala/exe_02/data.txt"
+    val data_path = "src/main/scala/exe_02/test_data.txt"
     val data = Source.fromFile(data_path).getLines.toList
     val test_case_1 = "1-3 a: abcde" // true
     val test_case_2 = "2-3 c: ccccccccc" // false

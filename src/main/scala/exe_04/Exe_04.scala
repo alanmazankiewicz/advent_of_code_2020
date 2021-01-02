@@ -7,7 +7,7 @@ object Exe_04 {
   def main(args: Array[String]): Unit = {
 
     val test_data_path = "src/main/scala/exe_04/test_data_2.txt"
-    val data_path = "src/main/scala/exe_04/data.txt"
+    val data_path = "src/main/scala/exe_04/test_data.txt"
 
     val full_test_data = Source.fromFile(test_data_path).getLines.toList
     val full_data = Source.fromFile(data_path).getLines.toList

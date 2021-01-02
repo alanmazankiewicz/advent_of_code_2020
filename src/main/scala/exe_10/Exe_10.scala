@@ -9,7 +9,7 @@ object Exe_10 {
     val test_data_path = "src/main/scala/exe_10/test_data.txt"
     val test_data = Source.fromFile(test_data_path).getLines.toList map (_.toInt)
 
-    val data_path = "src/main/scala/exe_10/data.txt"
+    val data_path = "src/main/scala/exe_10/test_data.txt"
     val data = Source.fromFile(data_path).getLines.toList map (_.toInt)
 
     def part_1(data: List[Int]): Int = {

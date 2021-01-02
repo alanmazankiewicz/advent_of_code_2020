@@ -5,7 +5,7 @@ import scala.io.Source
 object Exe_18 {
   def main(args: Array[String]): Unit = {
 
-    val data_path = "src/main/scala/exe_18/data.txt"
+    val data_path = "src/main/scala/exe_18/test_data.txt"
     val data = Source.fromFile(data_path).getLines.toVector
 
     def parse_expression(expression: String): Vector[String] = {
