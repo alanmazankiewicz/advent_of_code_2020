@@ -1,6 +1,7 @@
 package exe_20
 
 import scala.io.Source
+import scala.collection.mutable
 
 object Exe_20 {
 
@@ -56,25 +57,6 @@ object Exe_20 {
       (splitted map parse_tile).toList
     }
 
-
-    //    def get_upper(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
-    //      tiles filter { x => x.lower == cur_tile.upper }
-    //    }
-    //
-    //    def get_right(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
-    //      tiles filter { x => x.right == cur_tile.left }
-    //    }
-    //
-    //    def get_lower(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
-    //      tiles filter { x => x.upper == cur_tile.lower }
-    //    }
-    //
-    //    def get_left(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
-    //      tiles filter { x => x.left == cur_tile.right }
-    //    }
-
-    def print_size[T](lst: List[T]): Unit = println(lst.length)
-
     def find_orient_neigtbour(tiles: List[Tile])(tile: Tile): List[(String, Tile)] = {
 
       // it is absolultey clear that if two edge pattern match irrespective of orientation these tiles definetly match!
@@ -109,7 +91,7 @@ object Exe_20 {
       "upper" -> "lower", "lower" -> "upper", "left" -> "right", "right" -> "left"
     )
 
-    def get_correct_orient_neightbour(neighbour_tiles: List[(String,Tile)]): (Long, List[(Tile, String, Int, Boolean)]) = {
+    def get_correct_orient_neightbour(neighbour_tiles: List[(String, Tile)]): (Long, List[(Tile, String, Int, Boolean)]) = {
       val tile = neighbour_tiles.head
 
       def match_tiles(main_tile_edge: String, other_tile: Tile, direction: String, rotations: Int): Option[(Tile, String, Int, Boolean)] = {
@@ -119,17 +101,33 @@ object Exe_20 {
         else match_tiles(main_tile_edge, other_tile.rotate(), direction, rotations + 1)
       }
 
-      val good_neighboors = (for { // TODO i aldready know the position relative to tile -> dont search for that
+      val good_neighboors = (for {
         (direction, main_tile_edge) <- tile._2.edge_map
         (other_dir, other_tile) <- neighbour_tiles.tail
         if direction == other_dir
-        result <- match_tiles(main_tile_edge, other_tile, direction, 0) } yield result).toList
+        result <- match_tiles(main_tile_edge, other_tile, direction, 0)} yield result).toList
 
       (tile._2.id, good_neighboors)
     }
 
-    val test = find_orient_neigtbour(parsed_data)(parsed_data(1).flip())
-    val test_2 = get_correct_orient_neightbour(test)
+    def build_map_skeleton(initial_tile: Tile)(implicit tiles: List[Tile]): List[(Long, List[(Tile, String, Int, Boolean)])] = {
+      val visited: mutable.Set[Long] = mutable.Set()
+
+      def dynamic_search(tile: Tile)(implicit tiles: List[Tile]): List[(Long, List[(Tile, String, Int, Boolean)])] = {
+        val tmp = get_correct_orient_neightbour(find_orient_neigtbour(tiles)(tile))
+        val cur_results = (tmp._1, tmp._2 filter { x => !visited.contains(x._1.id) })
+        visited += tile.id
+        val final_res: List[(Long, List[(Tile, String, Int, Boolean)])] = (for {
+          res <- cur_results._2
+          if !visited.contains(res._1.id)
+        } yield dynamic_search(res._1)) flatMap { x => x }
+        cur_results :: final_res
+      }
+      dynamic_search(initial_tile)
+    }
+
+
+    val test = build_map_skeleton(parsed_data(1).flip())(parsed_data)
 
 
     println("as")
