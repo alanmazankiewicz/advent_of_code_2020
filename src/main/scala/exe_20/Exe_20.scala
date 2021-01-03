@@ -36,7 +36,7 @@ object Exe_20 {
     }
 
     def parse(data: String): List[Tile] = {
-      val splitted = data.split("Tile ") filter { x => x != "" }  // could be done better
+      val splitted = data.split("Tile ") filter { x => x != "" } // could be done better
 
       def parse_tile(raw_tile: String): Tile = {
         val splitted = raw_tile.split(":")
@@ -52,49 +52,56 @@ object Exe_20 {
 
         new Tile(id, upper, right, lower, left)
       }
+
       (splitted map parse_tile).toList
     }
 
 
-//    def get_upper(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
-//      tiles filter { x => x.lower == cur_tile.upper }
-//    }
-//
-//    def get_right(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
-//      tiles filter { x => x.right == cur_tile.left }
-//    }
-//
-//    def get_lower(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
-//      tiles filter { x => x.upper == cur_tile.lower }
-//    }
-//
-//    def get_left(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
-//      tiles filter { x => x.left == cur_tile.right }
-//    }
+    //    def get_upper(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
+    //      tiles filter { x => x.lower == cur_tile.upper }
+    //    }
+    //
+    //    def get_right(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
+    //      tiles filter { x => x.right == cur_tile.left }
+    //    }
+    //
+    //    def get_lower(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
+    //      tiles filter { x => x.upper == cur_tile.lower }
+    //    }
+    //
+    //    def get_left(implicit cur_tile: Tile, tiles: List[Tile]): List[Tile] = {
+    //      tiles filter { x => x.left == cur_tile.right }
+    //    }
 
     def print_size[T](lst: List[T]): Unit = println(lst.length)
 
-    def find_orient_neigtbour(tiles: List[Tile])(tile: Tile): List[Tile] = {
+    def find_orient_neigtbour(tiles: List[Tile])(tile: Tile): List[(String, Tile)] = {
 
       // it is absolultey clear that if two edge pattern match irrespective of orientation these tiles definetly match!
       // An edge cannot match more than one other match irrespective of orientation!!!
-      def get_any_edge(cur_tile_edge: String): List[Tile] = {
-        tiles filter { x => (x.lower == cur_tile_edge || x.upper == cur_tile_edge || x.left == cur_tile_edge || x.right == cur_tile_edge ||
-          x.lower.reverse == cur_tile_edge || x.upper.reverse == cur_tile_edge || x.left.reverse == cur_tile_edge || x.right.reverse == cur_tile_edge) &&
-          x.id != tile.id }
+      def get_any_edge(cur_tile_edge: String): Option[Tile] = {
+        tiles find { x =>
+          (x.lower == cur_tile_edge || x.upper == cur_tile_edge || x.left == cur_tile_edge || x.right == cur_tile_edge ||
+            x.lower.reverse == cur_tile_edge || x.upper.reverse == cur_tile_edge || x.left.reverse == cur_tile_edge || x.right.reverse == cur_tile_edge) &&
+            x.id != tile.id
+        }
       }
 
-      val res = tile.get_edges flatMap get_any_edge
-      tile :: res
+
+      val res: List[(String, Tile)] = (for {(k, v) <- tile.edge_map
+                                            res <- get_any_edge(v)
+                                            } yield (k, res)).toList
+      ("-", tile) :: res
     }
 
     def find_corners(tiles: List[Tile]): List[Long] = {
-      tiles map find_orient_neigtbour(tiles) filter { x => x.length == 3 } map { x => x.head.id }
+      tiles map find_orient_neigtbour(tiles) filter { x => x.length == 3 } map { x => x.head._2.id }
+
     }
 
     val parsed_data = parse(data)
-//    val result_1 = find_corners(parsed_data).product
-//    println(result_1)
+    //    val result_1 = find_corners(parsed_data).product
+    //    println(result_1)
 
     // part_2
 
@@ -102,7 +109,7 @@ object Exe_20 {
       "upper" -> "lower", "lower" -> "upper", "left" -> "right", "right" -> "left"
     )
 
-    def get_correct_orient_neightbour(neighbour_tiles: List[Tile]): (Long, List[(Tile, String, Int, Boolean)]) = {
+    def get_correct_orient_neightbour(neighbour_tiles: List[(String,Tile)]): (Long, List[(Tile, String, Int, Boolean)]) = {
       val tile = neighbour_tiles.head
 
       def match_tiles(main_tile_edge: String, other_tile: Tile, direction: String, rotations: Int): Option[(Tile, String, Int, Boolean)] = {
@@ -112,18 +119,17 @@ object Exe_20 {
         else match_tiles(main_tile_edge, other_tile.rotate(), direction, rotations + 1)
       }
 
-      val good_neighboors = (for {  // TODO i aldready know the position relative to tile -> dont search for that
-        (direction, main_tile_edge) <- tile.edge_map
-        other_tile <- neighbour_tiles.tail
-        result <- match_tiles(main_tile_edge, other_tile, direction, 0)
-      } yield result).toList
+      val good_neighboors = (for { // TODO i aldready know the position relative to tile -> dont search for that
+        (direction, main_tile_edge) <- tile._2.edge_map
+        (other_dir, other_tile) <- neighbour_tiles.tail
+        if direction == other_dir
+        result <- match_tiles(main_tile_edge, other_tile, direction, 0) } yield result).toList
 
-      (tile.id, good_neighboors)
+      (tile._2.id, good_neighboors)
     }
 
     val test = find_orient_neigtbour(parsed_data)(parsed_data(1).flip())
     val test_2 = get_correct_orient_neightbour(test)
-
 
 
     println("as")
