@@ -103,6 +103,11 @@ object Exe_20 {
       "upper" -> "lower", "lower" -> "upper", "left" -> "right", "right" -> "left"
     )
 
+    val sea_monster = List(
+      (1, -18), (1, -13), (1, -12), (1, -7), (1, -6), (1, -1), (1, 0), (1,1),
+      (2, -17), (2, -14), (2, -11), (2, -8), (2, -5), (2, -2)
+    ) // TODO May contain error
+
     def get_correct_orient_neightbour(neighbour_tiles: List[(String, Tile)]): (Long, List[(Tile, String, Int, Boolean)]) = {
       val tile = neighbour_tiles.head
 
@@ -206,7 +211,21 @@ object Exe_20 {
       val joined_rows = grouped_fields map { x => x reduce join_fields }
       val result = (joined_rows map {x => x.transpose map { y => y.mkString }} reduce join_fields).transpose map { x => x.mkString }
 
-      Vector("")
+      result
+    }
+
+
+    def check_sea_monsters(image: Vector[String]) = {
+
+      def check_location(pos: (Int, Int)): Boolean = {
+        val absolut_locs = sea_monster map { x => (pos._1 - x._1, pos._2 - x._2) }
+        if (absolut_locs exists { x => x._1 < 0 || x._2 < 0 || x._1 > image.length || x._2 > image.length }) false
+        else {
+          absolut_locs map { x => image(x._1)(x._2)} forall { x => x == '#' }
+        }
+      }
+
+
     }
 
 
