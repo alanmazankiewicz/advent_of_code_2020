@@ -2,6 +2,7 @@ package exe_20
 
 import scala.io.Source
 import scala.collection.mutable
+import scala.collection.immutable.SortedMap
 
 object Exe_20 {
 
@@ -36,7 +37,7 @@ object Exe_20 {
       }
     }
 
-    def parse(data: String): List[Tile] = {
+    def parse(data: String): (List[Tile], Map[Long, Vector[String]]) = {
       val splitted = data.split("Tile ") filter { x => x != "" } // could be done better
 
       def parse_tile(raw_tile: String): Tile = {
@@ -54,7 +55,18 @@ object Exe_20 {
         new Tile(id, upper, right, lower, left)
       }
 
-      (splitted map parse_tile).toList
+      def parse_inner_fields(data: String): (Long, Vector[String]) = {
+        val splitted = data.split(":")
+        val id = splitted(0).toLong
+        val two_d = splitted(1).grouped(10).toVector
+        val tmp = two_d.drop(1).dropRight(1)
+        val fin = tmp.transpose.drop(1).dropRight(1).transpose map { x => x.mkString }
+        (id, fin)
+      }
+
+      val tiles = (splitted map parse_tile).toList
+      val inner_fields = (splitted map parse_inner_fields).toMap
+      (tiles, inner_fields)
     }
 
     def find_orient_neigtbour(tiles: List[Tile])(tile: Tile): List[(String, Tile)] = {
@@ -81,7 +93,7 @@ object Exe_20 {
 
     }
 
-    val parsed_data = parse(data)
+    val (parsed_data, parsed_fields) = parse(data)
     //    val result_1 = find_corners(parsed_data).product
     //    println(result_1)
 
@@ -123,11 +135,86 @@ object Exe_20 {
         } yield dynamic_search(res._1)) flatMap { x => x }
         cur_results :: final_res
       }
+
       dynamic_search(initial_tile)
     }
 
+    def build_grid(map_skeleton: List[(Long, List[(Tile, String, Int, Boolean)])]): Map[(Int, Int), Long] = {
+      val skeleton_head = map_skeleton.head
+      val grid: mutable.Map[Long, (Int, Int)] = mutable.Map(skeleton_head._1 -> (0, 0))
 
+      def new_coord(cur_coord: (Int, Int), map_info: (Tile, String, Int, Boolean)): Unit = {
+        val (x, y) = cur_coord
+        val tile_id = map_info._1.id
+        val next_coord = map_info._2 match {
+          case "upper" => (x - 1, y)
+          case "right" => (x, y + 1)
+          case "lower" => (x + 1, y)
+          case "left" => (x, y - 1)
+        }
+        grid += (tile_id -> next_coord)
+      }
+
+      map_skeleton map { x => x._2 map { y => new_coord(grid(x._1), y) } } // Not very functional :D -> could be done with foldLeft
+
+      for {(k, v) <- grid.toMap} yield (v, k)
+    }
+
+    def rotate_image(image: Vector[String]): Vector[String] = {
+      val out = (image map (_.toArray)).toArray
+
+      val size = image.length;
+
+      {
+        (0 until size).map { i =>
+          (0 until size).map { j =>
+            out(i)(j) = image(size - j - 1)(i)
+          }
+        }
+      }
+      (out map (_.mkString)).toVector
+    }
+
+    def flip_image(image: Vector[String]): Vector[String] = {
+      (image.transpose map (x => x.reverse)).transpose map (x => x.mkString)
+    }
+
+    def adjust_inner_fields(inner_fields: Map[Long, Vector[String]], map_skeleton: List[(Long, List[(Tile, String, Int, Boolean)])]): Map[Long, Vector[String]] = {
+      val adjustment_data: List[(Tile, String, Int, Boolean)] = map_skeleton flatMap {x => x._2}
+      val base_id = map_skeleton.head._1
+      val base_field = inner_fields(base_id)
+
+      def adjust_field(id: Long, rotations: Int, flip: Boolean): (Long, Vector[String]) = {
+        val field = inner_fields(id)
+        val res = (0 until rotations).foldLeft(field)((x, y) => rotate_image(x))
+        if (flip) (id, flip_image(res))
+        else (id, res)
+      }
+
+      (adjustment_data map { x => adjust_field(x._1.id, x._3, x._4) }).toMap + (base_id -> base_field)
+    }
+
+    def build_image(grid: Map[(Int, Int), Long], final_fields: Map[Long, Vector[String]]): Vector[String] = {
+      val grouped_map = (grid groupBy { case (k, v) => k._1 }) map { case (k,v) => k -> (v.toList.sortBy(x => x._1._2)  map { x => x._2 }) }
+      val grouped = SortedMap(grouped_map.toSeq:_*) map { case (k, v) => v }  // TODO should be sorted now but may be problem
+      val grouped_fields = grouped map { x => x map final_fields }
+
+      def join_fields(field_1: Vector[String], field_2: Vector[String]): Vector[String] = {
+        (field_1 zip field_2) map { x => x._1 + x._2}
+      }
+
+      val joined_rows = grouped_fields map { x => x reduce join_fields }
+      val result = (joined_rows map {x => x.transpose map { y => y.mkString }} reduce join_fields).transpose map { x => x.mkString }
+
+      Vector("")
+    }
+
+
+    // TODO we must start with top left pic? or we must start with some pick thats oriented top left, or it does not matter?
     val test = build_map_skeleton(parsed_data(1).flip())(parsed_data)
+    val test_grid = build_grid(test)
+    val test3 = adjust_inner_fields(parsed_fields, test)
+    val test4 =  build_image(test_grid, test3)
 
 
     println("as")

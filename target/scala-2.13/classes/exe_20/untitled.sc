@@ -1,4 +1,3 @@
 
-val a:Set[Int] = Set()
-val b = a + 1
-println(b)
+val a = "abcd"
+val b = a.toArray
