@@ -187,7 +187,7 @@ object Exe_20 {
     def adjust_inner_fields(inner_fields: Map[Long, Vector[String]], map_skeleton: List[(Long, List[(Tile, String, Int, Boolean)])]): Map[Long, Vector[String]] = {
       val adjustment_data: List[(Tile, String, Int, Boolean)] = map_skeleton flatMap {x => x._2}
       val base_id = map_skeleton.head._1
-      val base_field = inner_fields(base_id)
+      val base_field = flip_image(inner_fields(base_id)) // TODO testing -> dont flip
 
       def adjust_field(id: Long, rotations: Int, flip: Boolean): (Long, Vector[String]) = {
         val field = inner_fields(id)
@@ -215,17 +215,46 @@ object Exe_20 {
     }
 
 
-    def check_sea_monsters(image: Vector[String]) = {
+    def check_sea_monsters(image: Vector[String]): Option[Vector[Vector[(Int, Int)]]] = {
 
-      def check_location(pos: (Int, Int)): Boolean = {
-        val absolut_locs = sea_monster map { x => (pos._1 - x._1, pos._2 - x._2) }
-        if (absolut_locs exists { x => x._1 < 0 || x._2 < 0 || x._1 > image.length || x._2 > image.length }) false
+      def check_location(pos: (Int, Int)): Option[Vector[(Int, Int)]] = {
+        val absolut_locs = sea_monster map { x => (pos._1 + x._1, pos._2 + x._2) }
+        if (absolut_locs exists { x => x._1 < 0 || x._2 < 0 || x._1 >= image.length || x._2 >= image.length }) None
         else {
-          absolut_locs map { x => image(x._1)(x._2)} forall { x => x == '#' }
+          if (absolut_locs map { x => image(x._1)(x._2)} forall { x => x == '#' }) Option(absolut_locs.toVector)
+          else None
         }
       }
 
+      val potential_monsters = for {
+        x <- image.indices
+        y <- image(0).indices
+        if image(x)(y) == '#'
+      } yield (x,y)
 
+      val res = (for {
+        x <- potential_monsters
+        res <- check_location(x)
+      } yield res)
+
+      if (res.isEmpty) None
+      else Option(res.toVector)
+    }
+
+    def run(tiles: List[Tile], inner_fields: Map[Long, Vector[String]]): Int = {
+      // val corner = find_corners(tiles)(0)
+      val corner = tiles(1).flip() // TODO testing
+      val map_skeleton = build_map_skeleton(corner)(parsed_data)
+      val grid = build_grid(map_skeleton)
+      val adjusted_inner_fields = adjust_inner_fields(inner_fields, map_skeleton)
+      val image = build_image(grid, adjusted_inner_fields)
+      val sea_monsters = check_sea_monsters(image) // TODO testing: must be another func that rotates and flips in case of no monsters
+
+      // TODO testing
+      sea_monsters match {
+        case Some(i) => i.length
+        case None => 0
+      }
     }
 
 
@@ -234,6 +263,8 @@ object Exe_20 {
     val test_grid = build_grid(test)
     val test3 = adjust_inner_fields(parsed_fields, test)
     val test4 =  build_image(test_grid, test3)
+
+    val big_test = run(parsed_data, parsed_fields)
 
 
     println("as")
