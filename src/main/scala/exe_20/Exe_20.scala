@@ -8,7 +8,7 @@ object Exe_20 {
 
   def main(args: Array[String]): Unit = {
 
-    val path = "src/main/scala/exe_20/test_data.txt"
+    val path = "src/main/scala/exe_20/data.txt"
     val data = Source.fromFile(path).getLines.mkString
 
     class Tile(val id: Long, val upper: String, val right: String, val lower: String, val left: String) { // could be parsed to booleans for size optimization
@@ -88,14 +88,13 @@ object Exe_20 {
       ("-", tile) :: res
     }
 
-    def find_corners(tiles: List[Tile]): List[Long] = {
-      tiles map find_orient_neigtbour(tiles) filter { x => x.length == 3 } map { x => x.head._2.id }
-
+    def find_corners(tiles: List[Tile]): List[Tile] = {
+      tiles map find_orient_neigtbour(tiles) filter { x => x.length == 3 } map { x => x.head._2 }
     }
 
     val (parsed_data, parsed_fields) = parse(data)
-    //    val result_1 = find_corners(parsed_data).product
-    //    println(result_1)
+    val result_1 = (find_corners(parsed_data) map { x => x.id }).product
+    println(result_1)
 
     // part_2
 
@@ -187,7 +186,7 @@ object Exe_20 {
     def adjust_inner_fields(inner_fields: Map[Long, Vector[String]], map_skeleton: List[(Long, List[(Tile, String, Int, Boolean)])]): Map[Long, Vector[String]] = {
       val adjustment_data: List[(Tile, String, Int, Boolean)] = map_skeleton flatMap {x => x._2}
       val base_id = map_skeleton.head._1
-      val base_field = flip_image(inner_fields(base_id)) // TODO testing -> dont flip
+      val base_field = inner_fields(base_id)
 
       def adjust_field(id: Long, rotations: Int, flip: Boolean): (Long, Vector[String]) = {
         val field = inner_fields(id)
@@ -201,7 +200,7 @@ object Exe_20 {
 
     def build_image(grid: Map[(Int, Int), Long], final_fields: Map[Long, Vector[String]]): Vector[String] = {
       val grouped_map = (grid groupBy { case (k, v) => k._1 }) map { case (k,v) => k -> (v.toList.sortBy(x => x._1._2)  map { x => x._2 }) }
-      val grouped = SortedMap(grouped_map.toSeq:_*) map { case (k, v) => v }  // TODO should be sorted now but may be problem
+      val grouped = SortedMap(grouped_map.toSeq:_*) map { case (k, v) => v }
       val grouped_fields = grouped map { x => x map final_fields }
 
       def join_fields(field_1: Vector[String], field_2: Vector[String]): Vector[String] = {
@@ -262,14 +261,16 @@ object Exe_20 {
     def compute_roughtness(final_image: Vector[String], sea_monsters: Vector[Vector[(Int, Int)]]): Int = {
       val clean_waters: Array[Array[Char]] = final_image.toArray map { x => x.toCharArray }
 
-      sea_monsters.flatten map { x => clean_waters(x._1)(x._2) = '.' }
+      sea_monsters.flatten map { x => clean_waters(x._1)(x._2) = '.' } // very functional haha :D
 
       clean_waters.flatten count { x => x == '#' }
     }
 
     def run(tiles: List[Tile], inner_fields: Map[Long, Vector[String]]): Int = {
-      // val corner = find_corners(tiles)(0)
-      val corner = tiles(1).flip() // TODO testing
+      // which of the corners we start with and which orientation they have does not matter.
+      // In fact it does not matter if its a corner or some other tile.
+      // This is because from there on everything builds up relative to the tile and orientation.
+      val corner = find_corners(tiles).head
       val map_skeleton = build_map_skeleton(corner)(parsed_data)
       val grid = build_grid(map_skeleton)
       val adjusted_inner_fields = adjust_inner_fields(inner_fields, map_skeleton)
@@ -278,13 +279,6 @@ object Exe_20 {
 
       compute_roughtness(final_image, sea_monsters)
     }
-
-
-    // TODO we must start with top left pic? or we must start with some pick thats oriented top left, or it does not matter?
-    val test = build_map_skeleton(parsed_data(1).flip())(parsed_data)
-    val test_grid = build_grid(test)
-    val test3 = adjust_inner_fields(parsed_fields, test)
-    val test4 =  build_image(test_grid, test3)
 
     val result_2 = run(parsed_data, parsed_fields)
 
