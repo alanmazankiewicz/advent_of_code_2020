@@ -221,7 +221,7 @@ object Exe_20 {
         val absolut_locs = sea_monster map { x => (pos._1 + x._1, pos._2 + x._2) }
         if (absolut_locs exists { x => x._1 < 0 || x._2 < 0 || x._1 >= image.length || x._2 >= image.length }) None
         else {
-          if (absolut_locs map { x => image(x._1)(x._2)} forall { x => x == '#' }) Option(absolut_locs.toVector)
+          if (absolut_locs map { x => image(x._1)(x._2)} forall { x => x == '#' }) Option((pos :: absolut_locs).toVector)
           else None
         }
       }
@@ -241,6 +241,32 @@ object Exe_20 {
       else Option(res.toVector)
     }
 
+    def find_sea_monsters(image: Vector[String]): (Vector[String], Vector[Vector[(Int, Int)]]) = {
+      val scary_monsters = check_sea_monsters(image)
+
+      scary_monsters match {
+        case Some(monsters) => (image, monsters)
+        case None => {
+
+          val flipped = flip_image(image)
+          val scarier_monsters = check_sea_monsters(flipped)
+
+          scarier_monsters match {
+            case Some(big_monsters) => (flipped, big_monsters)
+            case None => find_sea_monsters(rotate_image(image))
+          }
+        }
+      }
+    }
+
+    def compute_roughtness(final_image: Vector[String], sea_monsters: Vector[Vector[(Int, Int)]]): Int = {
+      val clean_waters: Array[Array[Char]] = final_image.toArray map { x => x.toCharArray }
+
+      sea_monsters.flatten map { x => clean_waters(x._1)(x._2) = '.' }
+
+      clean_waters.flatten count { x => x == '#' }
+    }
+
     def run(tiles: List[Tile], inner_fields: Map[Long, Vector[String]]): Int = {
       // val corner = find_corners(tiles)(0)
       val corner = tiles(1).flip() // TODO testing
@@ -248,13 +274,9 @@ object Exe_20 {
       val grid = build_grid(map_skeleton)
       val adjusted_inner_fields = adjust_inner_fields(inner_fields, map_skeleton)
       val image = build_image(grid, adjusted_inner_fields)
-      val sea_monsters = check_sea_monsters(image) // TODO testing: must be another func that rotates and flips in case of no monsters
+      val (final_image, sea_monsters) = find_sea_monsters(image)
 
-      // TODO testing
-      sea_monsters match {
-        case Some(i) => i.length
-        case None => 0
-      }
+      compute_roughtness(final_image, sea_monsters)
     }
 
 
@@ -264,10 +286,10 @@ object Exe_20 {
     val test3 = adjust_inner_fields(parsed_fields, test)
     val test4 =  build_image(test_grid, test3)
 
-    val big_test = run(parsed_data, parsed_fields)
+    val result_2 = run(parsed_data, parsed_fields)
 
 
-    println("as")
+    println(result_2)
     //END
   }
 }
