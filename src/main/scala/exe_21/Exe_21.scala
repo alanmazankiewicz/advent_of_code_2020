@@ -33,7 +33,7 @@ object Exe_21 {
     def part_2(raw_data: String): String = {
       val (data, all_ingred) = parser_1(raw_data)
       val tmp = data.groupBy(x => x._1) map { x => (x._1, x._2 map { y => y._2 }) }
-      val res = (tmp map { x => (x._1, x._2 reduce { (set_1, set_2) => set_1.intersect(set_2) }) }).toMap
+      val res = tmp map { x => (x._1, x._2 reduce { (set_1, set_2) => set_1.intersect(set_2) }) }
 
       val mut_res = collection.mutable.Map(res.toSeq: _*)
       val final_res: mutable.ArrayBuffer[(String, String)] = new mutable.ArrayBuffer()
