@@ -5,7 +5,7 @@ import scala.io.Source
 
 object Exe_23 {
   def main(args: Array[String]): Unit = {
-    val data = "389125467".map(_.asDigit).toArray
+    val data = "624397158".map(_.asDigit).toArray
 
     def next_pos(cur_pos: Int): Int = (cur_pos + 1) % data.length
 
@@ -75,9 +75,21 @@ object Exe_23 {
       remaining_cups.indexOf(destination_val)
     }
 
-    def part_1(inp: Array[Int], iterations: Int, current_pos: Int = 0): String = { // TODO: last part of exercise
+    def transform_res(inp: Array[Int]): Array[Int] = {
+      val one_idx = inp.indexOf(1)
+      var idx = next_pos(one_idx)
+      val res = mutable.ArrayBuffer[Int]()
 
-      if(iterations == 0) inp.mkString
+      while(idx != one_idx) {
+        res += inp(idx)
+        idx = next_pos(idx)
+      }
+      res.toArray
+    }
+
+    def part_1(inp: Array[Int], iterations: Int, current_pos: Int = 0): String = {
+
+      if(iterations == 0) transform_res(inp).mkString
       else {
         val current_val = inp(current_pos)
         val next_val = inp((current_pos + 4) % inp.length)
@@ -89,7 +101,7 @@ object Exe_23 {
       }
     }
 
-    println(part_1(data, 10))
+    println(part_1(data, 100))
 
     // END
   }
