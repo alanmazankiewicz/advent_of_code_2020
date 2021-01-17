@@ -18,7 +18,7 @@ object Exe_23 {
           val new_range = pick_up_range + nxt
           create_pick_up_range(nxt, i -1, new_range)
         }
-      } // TODO we dont need to copy the whole rest into a new array -> only pickup, keep rest or set to -1 and handle
+      }
 
       val remaining_cups: mutable.ArrayBuffer[Int] = mutable.ArrayBuffer()
       val pick_up: mutable.ArrayBuffer[Int] = mutable.ArrayBuffer()
@@ -72,7 +72,7 @@ object Exe_23 {
         if(destination_val < min_val) destination_val = remaining_cups.length + 3
         if(!pick_up.contains(destination_val)) break = false
       }
-      remaining_cups.indexOf(destination_val) // TODO might need ootimization in sec round
+      remaining_cups.indexOf(destination_val)
     }
 
     def transform_res_1(inp: Array[Int]): String = {
@@ -80,7 +80,7 @@ object Exe_23 {
       var idx = next_pos(one_idx, inp)
       val res = mutable.ArrayBuffer[Int]()
 
-      while(idx != one_idx) { // TODO das geht eigentlich nicht mit list
+      while(idx != one_idx) {
         res += inp(idx)
         idx = next_pos(idx, inp)
       }
@@ -92,7 +92,7 @@ object Exe_23 {
       def loop(inp: Array[Int], iterations: Int, current_pos: Int): String = {
         if(iterations == 0) trans_res(inp)
         else {
-          val current_val = inp(current_pos) // TODO geht nicht klar mit list
+          val current_val = inp(current_pos)
           val next_val = inp((current_pos + 4) % inp.length)
           val (remaining_cups, pick_up) = split_cups(current_pos, inp)
           val destination_pos = get_destination_pos(current_val, remaining_cups, pick_up)
@@ -105,23 +105,6 @@ object Exe_23 {
     }
 
     println(play(data, 100, transform_res_1))
-
-    // part 2
-
-    def transform_res_2(inp: Array[Int]): String = {
-      val one_idx = inp.indexOf(1)
-      val fst_idx = next_pos(one_idx, inp) // TODO mit list geht das nicht klar
-      val sec_idx = next_pos(fst_idx, inp)
-      (inp(fst_idx).toLong * inp(sec_idx).toLong).toString
-    }
-
-    def p2inp(inp: Array[Int]): Array[Int] = {
-      val max_val = inp.max + 1
-      val inp_lst = inp.toList
-      (inp_lst ::: (max_val to 1000000).toList).toArray
-    }
-
-    // println(play(p2inp(data), 10000000, transform_res_2))
 
 
 
